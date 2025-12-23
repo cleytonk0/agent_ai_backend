@@ -1,16 +1,32 @@
-# Ambiente virtual
-venv/
-__pycache__/
-*.pyc
-
-# Arquivos de ambiente
+# Environment variables
 .env
 
-# Banco de dados local
-*.db
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Logs
-*.log
+# Virtual environments
+venv/
+env/
+ENV/
 
 # IDE
 .vscode/
@@ -19,3 +35,11 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
