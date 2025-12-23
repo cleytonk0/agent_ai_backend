@@ -3,23 +3,28 @@
 Este documento explica todo o código relacionado ao banco de dados no projeto AI Agent Backend.
 
 ## 1. Estrutura Geral
+
 O projeto usa **SQLAlchemy** como ORM (Object-Relational Mapping) para interagir com o banco de dados. Atualmente configurado para **MySQL** via PyMySQL.
 
 ### Arquivos Principais:
+
 - `app/database/base.py`: Define a base para os modelos.
 - `app/database/session.py`: Configura a conexão e sessões do banco.
 - `app/models/models.py`: Define os modelos/tabelas.
 - `app/routers/routes.py`: Usa o banco para armazenar conversas.
 
 ## 2. app/database/base.py
+
 ```python
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 ```
+
 - **Explicação**: Cria uma base declarativa para todos os modelos. Todos os modelos (classes) herdam de `Base` para serem mapeados para tabelas no banco.
 
 ## 3. app/database/session.py
+
 ```python
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -35,6 +40,7 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 ```
+
 - **DATABASE_URL**: String de conexão. Formato: `mysql+pymysql://usuario:senha@host:porta/banco`.
   - `mysql+pymysql`: Driver PyMySQL para MySQL.
   - `root:root`: Usuário e senha (padrão local).
@@ -44,6 +50,7 @@ SessionLocal = sessionmaker(
 - **SessionLocal**: Fábrica de sessões. Cada sessão é uma transação isolada.
 
 ## 4. app/models/models.py
+
 ```python
 from sqlalchemy import Column, Integer, Text, DateTime
 from datetime import datetime, timezone
@@ -57,6 +64,7 @@ class Conversation(Base):
     agent_response = Column(Text, nullable=False)  # define a coluna 'agent_response' para armazenar a resposta do agente
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))  # define a coluna 'created_at' para armazenar a data e hora de criação, com fuso horário UTC
 ```
+
 - **Classe Conversation**: Representa a tabela `conversations`.
 - **Campos**:
   - `id`: Chave primária, auto-incremento.
@@ -67,6 +75,7 @@ class Conversation(Base):
 - **Herança de Base**: Permite que SQLAlchemy crie a tabela automaticamente.
 
 ## 5. app/main.py (Parte do Banco)
+
 ```python
 from app.database.base import Base
 from app.database.session import engine
@@ -74,9 +83,11 @@ from app.models import models
 
 Base.metadata.create_all(bind=engine)
 ```
+
 - **create_all()**: Cria todas as tabelas definidas nos modelos (se não existirem). Executado na inicialização do app.
 
 ## 6. app/routers/routes.py (Uso do Banco)
+
 ```python
 from app.database.session import SessionLocal
 from app.models.models import Conversation
@@ -103,11 +114,13 @@ def interact(data: ConversationRequest, db: Session = Depends(get_db)):
 
     return {"response": response}
 ```
+
 - **get_db()**: Dependência FastAPI que fornece uma sessão de banco por requisição. Fecha automaticamente.
 - **Armazenamento**: Cria um objeto `Conversation`, adiciona à sessão e commita (salva no banco).
 - **Transação**: `db.commit()` persiste as mudanças.
 
 ## 7. Como Funciona o Fluxo
+
 1. **Inicialização**: `Base.metadata.create_all()` cria tabelas.
 2. **Requisição**: Endpoint `/agent` recebe dados.
 3. **Processamento**: Gera resposta via LLM (Groq).
@@ -115,14 +128,17 @@ def interact(data: ConversationRequest, db: Session = Depends(get_db)):
 5. **Resposta**: Retorna JSON com a resposta.
 
 ## 8. Comandos Úteis no MySQL Workbench
+
 - Ver tabelas: `USE agent_db; SHOW TABLES;`
 - Ver dados: `SELECT * FROM conversations;`
 - Estrutura da tabela: `DESCRIBE conversations;`
 
 ## 9. Alternativa para SQLite
+
 Se quiser voltar para SQLite (sem servidor), mude `DATABASE_URL` para `"sqlite:///./agent.db"`.
 
 ## 10. Dependências
+
 - `sqlalchemy`: ORM.
 - `pymysql`: Driver MySQL.
 - `cryptography`: Para autenticação MySQL.
